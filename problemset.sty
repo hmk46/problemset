@@ -1,0 +1,132 @@
+\ProvidesPackage{problemset}
+\usepackage{ifluatex}
+\usepackage{colorprofiles}
+\usepackage[ua,a-3a,mathxmp]{pdfx}
+\hypersetup{bookmarksnumbered=true,pdfencoding=unicode}
+\ifluatex
+\usepackage{fontspec}
+\defaultfontfeatures{Ligatures={TeX}}
+\fi
+\usepackage[english]{babel}
+\usepackage[intlimits]{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{stix2}
+\usepackage{xparse}
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+
+% questions environment
+\NewDocumentEnvironment{questions}{}
+  {
+    \newif\ifhadparts
+    \newif\ifhadsoln
+    \hadpartsfalse
+    \hadsolnfalse
+    \NewDocumentCommand{\qn}{o}{%
+      \ifhadparts
+        \ifhadsoln
+          \end{proof}
+        \fi % hadsoln
+        \end{enumerate}
+      \else % hadparts
+        \ifhadsoln
+          \end{proof}
+        \fi % hadsoln
+      \fi %hadparts
+      \hadpartsfalse
+      \hadsolnfalse
+      \medskip
+      \IfNoValueTF{##1}{
+        \item
+      }{
+        \item[##1]
+      }
+    }
+    \DeclareDocumentCommand{\pt}{o}{%
+      \ifhadparts\else
+        \hadpartstrue
+        \begin{enumerate}
+      \fi
+      \ifhadsoln
+        \end{proof}
+      \fi
+      \hadsolnfalse
+      \IfNoValueTF{##1}{
+        \item
+      }{
+        \item[##1]
+      }
+    }
+    \DeclareDocumentCommand{\sn}{}{
+      \hadsolntrue
+      \begin{proof}[Solution]
+    }
+    \DeclareDocumentCommand{\pf}{}{
+      \hadsolntrue
+      \begin{proof}
+    }
+    \begin{enumerate}
+  }{
+    \ifhadparts
+      \ifhadsoln
+        \end{proof}
+      \fi % hadsoln
+      \end{enumerate}
+    \else % hadparts
+      \ifhadsoln
+        \end{proof}
+      \fi % hadsoln
+    \fi %hadparts
+    \end{enumerate}
+  }
+
+% metadata control
+\newif\ifmanualtitle
+\newif\ifmanualauthor
+\def\ps@title{\empty}
+\def\ps@class{\empty}
+\def\ps@session{\empty}
+\def\ps@author{\empty}
+\def\ps@studentid{\empty}
+\def\ps@school{\empty}
+\NewDocumentCommand{\class}{m}{\def\ps@class{#1}}
+\NewDocumentCommand{\session}{m}{\def\ps@session{#1}}
+\NewDocumentCommand{\studentid}{m}{\def\ps@studentid{#1}}
+\NewDocumentCommand{\school}{m}{\def\ps@school{#1}}
+\RenewDocumentCommand{\title}{m}{\def\ps@title{#1}}
+\RenewDocumentCommand{\author}{m}{\def\ps@author{#1}}
+
+\NewDocumentCommand{\problemset}{O{en-CA}}{
+  \ifmanualtitle
+    \def\@title{\ps@title}
+  \else
+    \if{\relax\ps@title\relax}
+      \def\@title{\normalsize \ps@class \ps@session, \ps@school}
+    \else
+      \def\@title{
+        \ps@title\\
+        \normalsize \ps@class \ps@session, \ps@school
+      }
+    \fi
+  \fi
+  \ifmanualauthor
+    \def\@author{\ps@author}
+  \else
+    \def\@author{\ps@author \hfill \ps@studentid}
+  \fi
+  \lhead[]{\ps@author}
+  \chead[]{\ps@school}
+  \rhead[]{\ps@studentid}
+  \lfoot[]{\ps@class}
+  \cfoot[]{\ps@title}
+  \rfoot{Page \thepage}
+  \newwrite\xmpout
+  \immediate\openout\xmpout=\jobname.xmpdata
+  \write\xmpout{\unexpanded{\Title}{\ps@title}}
+  \write\xmpout{\unexpanded{\Author}{\ps@author}}
+  \write\xmpout{\unexpanded{\Language}{#1}}
+}
+\endinput
